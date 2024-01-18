@@ -5,3 +5,8 @@ variable "app_image_bucket_name" {
   default = "rapa-app-image-bucket"
 
 }
+
+variable "app_nsfw_detect_lambda_arn" {
+  type        = string
+  description = "The ARN of the lambda function"
+}
