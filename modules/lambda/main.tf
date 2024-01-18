@@ -1,20 +1,17 @@
 
 
-# lambda function이 사용할 docker image repository에 대한 정보를 가져온다
-data "aws_ecr_repository" "app_nsfw_detect_lambda_repo" {
-  name = "nsfw-detector"
-}
+
 
 # lambda function을 생성한다.
 resource "aws_lambda_function" "app_nsfw_detect_lambda" {
   function_name = "app-nsfw-detect-lambda"
 
-  role          = var.app_nsfw_detect_lambda_iam_role_arn
-  image_uri     = "${data.aws_ecr_repository.app_nsfw_detect_lambda_repo.repository_url}:latest"
-  package_type  = "Image"
-  memory_size   = 1024
-  timeout       = 120
-  depends_on    = [var.app_nsfw_detect_lambda_iam_role_arn]
+  role         = var.app_nsfw_detect_lambda_iam_role_arn
+  image_uri    = "${var.app_nsfw_dtect_lambda_ecr_url}:latest"
+  package_type = "Image"
+  memory_size  = 1500
+  timeout      = 240
+  depends_on   = [var.app_nsfw_detect_lambda_iam_role_arn]
 }
 
 

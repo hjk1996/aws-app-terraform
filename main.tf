@@ -22,12 +22,22 @@ module "vpc_module" {
 module "s3_module" {
   source                     = "./modules/s3"
   app_nsfw_detect_lambda_arn = module.lambda_module.app_nsfw_detect_lambda_arn
+
 }
 
 module "lambda_module" {
   source                              = "./modules/lambda"
   app_image_bucket_arn                = module.s3_module.app_image_bucket_arn
   app_nsfw_detect_lambda_iam_role_arn = module.iam_role_module.app_nsfw_detect_lambda_iam_role_arn
+  app_nsfw_dtect_lambda_ecr_url       = module.ecr_module.app_nsfw_dtect_lambda_ecr_url
 }
 
+module "ecr_module" {
+  source = "./modules/ecr"
+}
 
+module "security_group_module" {
+  source               = "./modules/security_group"
+  app_vpc_id = module.vpc_module.app_vpc_id
+  public_subnet_cidr_blocks = module.vpc_module.public_subnet_cidr_blocks  
+}
