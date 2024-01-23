@@ -10,6 +10,7 @@ variable "app_frontend_bucket_name" {
   default = "rapa-app-frontend-bucket"
 }
 
+
 variable "app_nsfw_detect_lambda_arn" {
   type        = string
   description = "The ARN of the lambda function"

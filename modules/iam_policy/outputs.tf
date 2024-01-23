@@ -3,6 +3,11 @@ output "lambda_trust_policy" {
   value       = data.aws_iam_policy_document.lambda_trust_policy_data.json
 }
 
+output "eks_trust_policy" {
+  description = "The trust policy for the eks cluster"
+  value = data.aws_iam_policy_document.eks_cluster_role_policy.json
+}
+
 
 output "app_nsfw_detect_lambda_policy_arns" {
   description = "The policy for the lambda function"

@@ -42,6 +42,33 @@ data "aws_iam_policy_document" "lambda_trust_policy_data" {
   }
 }
 
+data "aws_iam_policy_document" "eks_trust_policy_data" {
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["eks.amazonaws.com"]
+    }
+
+  }
+}
+
+
+data "aws_iam_policy_document" "eks_cluster_role_policy" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:GetObject",
+      "s3:PutObject"
+    ]
+    resources = [
+      "${var.app_image_bucket_arn}/*"
+    ]
+  }
+
+}
+
 
 
 resource "aws_iam_policy" "app_nsfw_detect_lambda_policy" {
