@@ -5,7 +5,7 @@ output "lambda_trust_policy" {
 
 output "eks_trust_policy" {
   description = "The trust policy for the eks cluster"
-  value = data.aws_iam_policy_document.eks_cluster_role_policy.json
+  value       = data.aws_iam_policy_document.eks_cluster_role_policy.json
 }
 
 

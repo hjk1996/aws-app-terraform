@@ -28,7 +28,7 @@ module "iam_policy_module" {
 module "iam_role_module" {
   source                         = "./modules/iam_role"
   lambda_trust_policy            = module.iam_policy_module.lambda_trust_policy
-  eks_trust_policy = module.iam_policy_module.eks_trust_policy
+  eks_trust_policy               = module.iam_policy_module.eks_trust_policy
   nsfw_detect_lambda_policy_arns = module.iam_policy_module.app_nsfw_detect_lambda_policy_arns
 }
 

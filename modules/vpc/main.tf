@@ -45,17 +45,17 @@ resource "aws_route_table" "app-vpc-private-route-table" {
 }
 
 resource "aws_subnet" "app-vpc-public-subnets" {
-  for_each          = var.subnet_list
-  vpc_id            = aws_vpc.app-vpc.id
-  cidr_block        = "10.0.${each.key}.0/24"
-  availability_zone = "${data.aws_region.current.name}${each.value}"
+  for_each                = var.subnet_list
+  vpc_id                  = aws_vpc.app-vpc.id
+  cidr_block              = "10.0.${each.key}.0/24"
+  availability_zone       = "${data.aws_region.current.name}${each.value}"
   map_public_ip_on_launch = true
   tags = {
     Name      = "app-vpc-public-subnet-${each.value}"
     Terraform = "true"
   }
   depends_on = [aws_internet_gateway.app-vpc-igw, aws_route_table.app-vpc-public-route-table]
-  
+
 }
 
 
