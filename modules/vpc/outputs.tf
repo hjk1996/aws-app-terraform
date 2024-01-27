@@ -1,18 +1,18 @@
 output "app_vpc_id" {
   description = "The ID of the VPC"
-  value       = aws_vpc.app-vpc.id
+  value       = module.app_vpc.vpc_id
 }
 
 output "public_subnet_ids" {
   description = "The IDs of the public subnets"
-  value       = [for subnet in aws_subnet.app-vpc-public-subnets : subnet.id]
+  value       = module.app_vpc.public_subnets
 }
 
 output "private_subnet_ids" {
   description = "The IDs of the private subnets"
-  value       = [for subnet in aws_subnet.app-vpc-private-subnets : subnet.id]
+  value       = module.app_vpc.private_subnets
 }
 
 output "public_subnet_cidr_blocks" {
-  value = [for subnet in aws_subnet.app-vpc-public-subnets : subnet.cidr_block]
+  value = module.app_vpc.public_subnets_cidr_blocks
 }

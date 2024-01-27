@@ -18,3 +18,8 @@ output "private_subnet_ids" {
   description = "The IDs of the private subnets"
   value       = module.vpc_module.private_subnet_ids
 }
+
+output "eks_cluster_endpoint" {
+  description = "The endpoint of the EKS cluster"
+  value       = module.eks_module.eks_cluster_endpoint
+}
