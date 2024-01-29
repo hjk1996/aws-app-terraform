@@ -155,3 +155,5 @@ resource "aws_iam_policy" "karpenter_controller_iam_policy" {
   }
 
 }
+
+

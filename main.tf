@@ -5,9 +5,12 @@ provider "aws" {
   region = "us-east-1"
 }
 
+
+
+
 terraform {
   backend "s3" {
-    bucket = "rapa-app-tfstate-bucket"
+    bucket = "app-tfstate-bucket"
     key    = "terraform.tfstate"
     region = "us-east-1"
   }
@@ -15,7 +18,8 @@ terraform {
 }
 
 locals {
-  eks_cluster_name = "app-eks-cluster"
+  eks_cluster_name                   = "app-eks"
+  lb_controller_service_account_name = "aws-load-balancer-controller"
 }
 
 
@@ -38,12 +42,12 @@ module "iam_role_module" {
 }
 
 module "vpc_module" {
-  source         = "./modules/vpc"
-  eks_cluster_name = local.eks_cluster_name
-  vpc_name = "app_vpc"
-  vpc_azs = ["us-east-1a", "us-east-1b"]
-  vpc_cidr = "10.0.0.0/16"
-  vpc_public_subnets = ["10.0.1.0/24", "10.0.2.0/24"]
+  source              = "./modules/vpc"
+  eks_cluster_name    = local.eks_cluster_name
+  vpc_name            = "app_vpc"
+  vpc_azs             = ["us-east-1a", "us-east-1b"]
+  vpc_cidr            = "10.0.0.0/16"
+  vpc_public_subnets  = ["10.0.1.0/24", "10.0.2.0/24"]
   vpc_private_subnets = ["10.0.101.0/24", "10.0.102.0/24"]
 }
 

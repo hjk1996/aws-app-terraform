@@ -16,3 +16,8 @@ output "app_nsfw_detect_lambda_policy_arns" {
     aws_iam_policy.allow_logs_policy.arn,
   ]
 }
+
+output "load_balancer_controller_iam_policy_arn" {
+  description = "The policy for the load balancer controller"
+  value       = aws_iam_policy.load_balancer_controller_iam_policy.arn
+}
