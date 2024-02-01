@@ -162,5 +162,21 @@ module "load_balancer_controller_irsa_role" {
   }
 }
 
+module "fluent_bit_irsa_role" {
+  source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
 
-# 
+  role_name                      = "${var.eks_cluster_name}-fluent-bit"
+
+
+  role_policy_arns = {
+    policy = "arn:aws:iam::aws:policy/AmazonOpenSearchServiceFullAccess"
+  }
+
+  oidc_providers = {
+    main = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["logging:fluent-bit-service-account"]
+    }
+  }
+  
+}
