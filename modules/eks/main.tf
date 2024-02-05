@@ -10,6 +10,17 @@ data "aws_region" "current" {
 
 }
 
+
+resource "tls_private_key" "eks-worker-ssh" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+resource "aws_key_pair" "eks-worker-key" {
+  key_name   = "eks-worker-key"
+  public_key = tls_private_key.eks-worker-ssh.public_key_openssh
+}
+
 // EKS 클러스터 생성
 module "eks" {
   source = "terraform-aws-modules/eks/aws"
@@ -23,7 +34,7 @@ module "eks" {
   cluster_endpoint_public_access  = true
 
   node_security_group_tags = {
-    "karpenter.sh/discovery"                          = var.eks_cluster_name
+    "karpenter.sh/discovery" = var.eks_cluster_name
   }
 
 
@@ -92,15 +103,16 @@ module "eks" {
     iam_role_attach_cni_policy = true
   }
 
-  
+
   eks_managed_node_groups = {
     eks_worker = {
 
-      min_size     = 1
-      max_size     = 3
+      min_size = 1
+      max_size = 3
       labels = {
         role = "general"
       }
+      key_name = aws_key_pair.eks-worker-key.key_name
       subnet_ids     = var.private_subnet_ids
       instance_types = var.instance_types
       capacity_type  = "ON_DEMAND"
@@ -165,7 +177,7 @@ module "load_balancer_controller_irsa_role" {
 module "fluent_bit_irsa_role" {
   source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
 
-  role_name                      = "${var.eks_cluster_name}-fluent-bit"
+  role_name = "${var.eks_cluster_name}-fluent-bit"
 
 
   role_policy_arns = {
@@ -178,5 +190,5 @@ module "fluent_bit_irsa_role" {
       namespace_service_accounts = ["logging:fluent-bit-service-account"]
     }
   }
-  
+
 }
