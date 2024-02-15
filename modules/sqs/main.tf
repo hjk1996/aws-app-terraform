@@ -1,7 +1,7 @@
 
 
 resource "aws_sqs_queue" "image_caption_queue" {
-  name                        = "image-caption-queue"
+  name = "image-caption-queue"
 }
 
 
@@ -12,17 +12,17 @@ resource "aws_sqs_queue_policy" "image_caption_queue_policy" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
-   {
-        Effect    = "Allow"
+      {
+        Effect = "Allow"
         Principal = {
           AWS = var.image_caption_irsa_role_arn
         }
-        Action    = [
+        Action = [
           "sqs:ReceiveMessage",
           "sqs:DeleteMessage",
           "sqs:GetQueueAttributes"
         ]
-        Resource  = aws_sqs_queue.image_caption_queue.arn
+        Resource = aws_sqs_queue.image_caption_queue.arn
       },
 
       {
@@ -32,7 +32,7 @@ resource "aws_sqs_queue_policy" "image_caption_queue_policy" {
         Resource  = aws_sqs_queue.image_caption_queue.arn
         Condition = {
           ArnEquals = {
-            "aws:SourceArn": var.app_image_bucket_arn
+            "aws:SourceArn" : var.app_image_bucket_arn
           }
         }
       }

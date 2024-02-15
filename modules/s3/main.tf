@@ -1,3 +1,6 @@
+
+
+
 ### S3 Bucket for storing images
 resource "aws_s3_bucket" "app_image_bucket" {
   bucket = var.app_image_bucket_name
@@ -86,27 +89,24 @@ data "aws_lambda_function" "app_on_obeject_created_lambda" {
   function_name = "app_on_object_created"
 }
 
-data "aws_lambda_function" "app_on_object_deleted_lambda" {
-  function_name = "app_on_object_deleted"
-}
 
 
 resource "aws_s3_bucket_notification" "app_s3_notification" {
   bucket = aws_s3_bucket.app_image_bucket.id
-  
+
 
 
   topic {
-    id = "on_object_created"
-    topic_arn = var.app_on_object_created_topic_arn
-    events = ["s3:ObjectCreated:*"]
+    id            = "on_object_created"
+    topic_arn     = var.app_on_object_created_topic_arn
+    events        = ["s3:ObjectCreated:*"]
     filter_prefix = "original/"
   }
 
   topic {
-    id = "on_object_deleted"
-    topic_arn = var.app_on_object_deleted_topic_arn
-    events = ["s3:ObjectRemoved:*"]
+    id            = "on_object_deleted"
+    topic_arn     = var.app_on_object_deleted_topic_arn
+    events        = ["s3:ObjectRemoved:*"]
     filter_prefix = "original/"
   }
 
@@ -124,12 +124,12 @@ resource "aws_s3_bucket_notification" "app_s3_notification" {
   #   filter_prefix       = "original/"
   # }
 
-# queue {
-#   id = "image_caption_queue"
-#   queue_arn = var.image_caption_queue_arn
-#   events = ["s3:ObjectCreated:*"]
-#   filter_prefix = "original/"
-# }
+  # queue {
+  #   id = "image_caption_queue"
+  #   queue_arn = var.image_caption_queue_arn
+  #   events = ["s3:ObjectCreated:*"]
+  #   filter_prefix = "original/"
+  # }
 
 }
 

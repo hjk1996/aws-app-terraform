@@ -231,7 +231,7 @@ module "image_caption_irsa_role" {
 
 
   role_policy_arns = {
-    SQSFullAccess = "arn:aws:iam::aws:policy/AmazonSQSFullAccess"
+    SQSFullAccess      = "arn:aws:iam::aws:policy/AmazonSQSFullAccess"
     DynamoDBFullAccess = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
   }
 

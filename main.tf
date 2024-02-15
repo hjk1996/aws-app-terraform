@@ -24,8 +24,8 @@ locals {
 
 
 module "s3_module" {
-  source                     = "./modules/s3"
-  image_caption_queue_arn = module.sqs_module.image_caption_queue_arn
+  source                          = "./modules/s3"
+  image_caption_queue_arn         = module.sqs_module.image_caption_queue_arn
   app_on_object_created_topic_arn = module.sns_module.app_on_object_created_topic_arn
   app_on_object_deleted_topic_arn = module.sns_module.app_on_object_deleted_topic_arn
 }
@@ -55,9 +55,11 @@ module "vpc_module" {
 
 
 module "lambda_module" {
-  source                              = "./modules/lambda"
-  app_image_bucket_arn                = module.s3_module.app_image_bucket_arn
-  app_on_object_created_topic_arn =   module.sns_module.app_on_object_created_topic_arn
+  source                          = "./modules/lambda"
+  app_image_bucket_arn            = module.s3_module.app_image_bucket_arn
+  app_on_object_created_topic_arn = module.sns_module.app_on_object_created_topic_arn
+  delete_face_index_lambda_arn    = module.iam_role_module.delete_face_index_lambda_arn
+  app_on_object_deleted_topic_arn = module.sns_module.app_on_object_deleted_topic_arn
 }
 
 module "ecr_module" {
@@ -81,9 +83,9 @@ module "eks_module" {
 }
 
 module "sqs_module" {
-  source = "./modules/sqs"
-  face_index_lambda_arn = module.lambda_module.face_index_lambda_arn
-  app_image_bucket_arn = module.s3_module.app_image_bucket_arn
+  source                      = "./modules/sqs"
+  face_index_lambda_arn       = module.lambda_module.face_index_lambda_arn
+  app_image_bucket_arn        = module.s3_module.app_image_bucket_arn
   image_caption_irsa_role_arn = module.eks_module.image_caption_irsa_role_arn
 }
 
@@ -93,7 +95,8 @@ module "dynamodb_module" {
 }
 
 module "sns_module" {
-  source = "./modules/sns"
-  app_image_bucket_arn = module.s3_module.app_image_bucket_arn
+  source                = "./modules/sns"
+  app_image_bucket_arn  = module.s3_module.app_image_bucket_arn
   face_index_lambda_arn = module.lambda_module.face_index_lambda_arn
+  delete_face_index_lambda_arn = module.lambda_module.delete_face_index_lambda_arn
 }

@@ -17,7 +17,7 @@ variable "image_caption_queue_arn" {
 
 variable "app_on_object_created_topic_arn" {
   type = string
-  
+
 }
 
 variable "app_on_object_deleted_topic_arn" {

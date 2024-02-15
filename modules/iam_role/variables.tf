@@ -10,3 +10,5 @@ variable "nsfw_detect_lambda_policy_arns" {
   type = list(string)
 }
 
+
+
