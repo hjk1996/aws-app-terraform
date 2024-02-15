@@ -69,16 +69,16 @@ module "eks" {
 
   cluster_addons = {
     coredns = {
-      most_recent = true
-
+      version           = "v1.11.1-eksbuild.6"
       resolve_conflicts = "OVERWRITE"
     }
     kube-proxy = {
-      most_recent = true
+      version           = "v1.29.0-eksbuild.3"
+      resolve_conflicts = "OVERWRITE"
 
     }
     vpc-cni = {
-      most_recent              = true
+      version                  = "v1.16.2-eksbuild.1"
       resolve_conflicts        = "OVERWRITE"
       service_account_role_arn = module.vpc_cni_irsa.iam_role_arn
 
@@ -97,25 +97,37 @@ module "eks" {
 
 
   eks_managed_node_group_defaults = {
-    disk_size                  = 30
+    disk_size                  = 100
     instance_types             = var.instance_types
     ami_type                   = "AL2_x86_64"
     iam_role_attach_cni_policy = true
+    block_device_mappings = {
+      xvda = {
+        device_name = "/dev/xvda"
+        ebs = {
+          volume_size           = 100
+          volume_type           = "gp3"
+          iops                  = 3000
+          throughput            = 150
+          encrypted             = true
+          delete_on_termination = true
+        }
+      }
+    }
   }
-
 
   eks_managed_node_groups = {
     eks_worker = {
-
       min_size = 1
       max_size = 3
       labels = {
         role = "general"
       }
-      key_name = aws_key_pair.eks-worker-key.key_name
+      key_name       = aws_key_pair.eks-worker-key.key_name
       subnet_ids     = var.private_subnet_ids
       instance_types = var.instance_types
       capacity_type  = "ON_DEMAND"
+      disk_size      = 100
     }
   }
 
@@ -190,5 +202,43 @@ module "fluent_bit_irsa_role" {
       namespace_service_accounts = ["logging:fluent-bit-service-account"]
     }
   }
+}
 
+module "face_search_irsa_role" {
+  source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+
+  role_name = "${var.eks_cluster_name}-face-search"
+
+  role_policy_arns = {
+    RekognitionAccess = "arn:aws:iam::aws:policy/AmazonRekognitionFullAccess",
+    S3FullAccess      = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+  }
+
+  oidc_providers = {
+    main = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["face-search:face-search-service-account"]
+    }
+  }
+
+}
+
+module "image_caption_irsa_role" {
+  source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+
+  role_name = "${var.eks_cluster_name}-image-caption"
+
+
+
+  role_policy_arns = {
+    SQSFullAccess = "arn:aws:iam::aws:policy/AmazonSQSFullAccess"
+    DynamoDBFullAccess = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+  }
+
+  oidc_providers = {
+    main = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["image-caption:image-caption-service-account"]
+    }
+  }
 }

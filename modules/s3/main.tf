@@ -30,7 +30,20 @@ resource "aws_s3_bucket_policy" "app_image_bucket_policy" {
           ],
           "Resource" : "${aws_s3_bucket.app_image_bucket.arn}/*"
         },
-       
+        {
+          "Sid" : "AllowCloudFrontServicePrincipal",
+          "Effect" : "Allow",
+          "Principal" : {
+            "Service" : "cloudfront.amazonaws.com"
+          },
+          "Action" : "s3:GetObject",
+          "Resource" : "arn:aws:s3:::rapa-app-image-bucket/*",
+          "Condition" : {
+            "StringEquals" : {
+              "AWS:SourceArn" : "arn:aws:cloudfront::109412806537:distribution/E3DGL65NQD7DE4"
+            }
+          }
+        }
       ]
     }
   )
@@ -41,90 +54,91 @@ resource "aws_s3_bucket_policy" "app_image_bucket_policy" {
 resource "aws_s3_bucket_cors_configuration" "example" {
   bucket = aws_s3_bucket.app_image_bucket.id
 
-  cors_rule {
-    allowed_headers = ["*"]
-    allowed_methods = ["GET"]
-    allowed_origins = ["https://www.amazonphotoquery.site"]
-    expose_headers  = ["ETag"]
-    max_age_seconds = 3000
-  }
+  # cors_rule {
+  #   allowed_headers = ["*"]
+  #   allowed_methods = ["GET"]
+  #   allowed_origins = ["https://www.amazonphotoquery.site"]
+  #   expose_headers  = ["ETag"]
+  #   max_age_seconds = 3000
+  # }
 
   cors_rule {
-    allowed_methods = ["GET"]
+    allowed_methods = ["GET", "HEAD"]
+    allowed_headers = ["*"]
     allowed_origins = ["*"]
+    expose_headers  = ["x-amz-server-side-encryption", "x-amz-request-id", "x-amz-id-2"]
   }
+
+  # cors_rule {
+  #   allowed_headers = ["*"]
+  #   allowed_methods = ["GET"]
+  #   allowed_origins = ["https://s3.amazonphotoquery.site"]
+  # }
+
+
 }
 
 data "aws_lambda_function" "app_image_resize_lambda" {
   function_name = "app-image-resize"
 }
 
+data "aws_lambda_function" "app_on_obeject_created_lambda" {
+  function_name = "app_on_object_created"
+}
 
-resource "aws_s3_bucket_notification" "s3_image_resize_lambda_notification" {
+data "aws_lambda_function" "app_on_object_deleted_lambda" {
+  function_name = "app_on_object_deleted"
+}
+
+
+resource "aws_s3_bucket_notification" "app_s3_notification" {
   bucket = aws_s3_bucket.app_image_bucket.id
-  lambda_function {
-    lambda_function_arn = data.aws_lambda_function.app_image_resize_lambda.arn
-    events              = ["s3:ObjectCreated:*"]
-    filter_prefix       = "original/"
-    filter_suffix       = ".jpg"
+  
 
-  }
-  lambda_function {
-    lambda_function_arn = data.aws_lambda_function.app_image_resize_lambda.arn
-    events              = ["s3:ObjectCreated:*"]
-    filter_prefix       = "original/"
-    filter_suffix       = ".jpeg"
+
+  topic {
+    id = "on_object_created"
+    topic_arn = var.app_on_object_created_topic_arn
+    events = ["s3:ObjectCreated:*"]
+    filter_prefix = "original/"
   }
 
-  lambda_function {
-    lambda_function_arn = data.aws_lambda_function.app_image_resize_lambda.arn
-    events              = ["s3:ObjectCreated:*"]
-    filter_prefix       = "original/"
-    filter_suffix       = ".png"
+  topic {
+    id = "on_object_deleted"
+    topic_arn = var.app_on_object_deleted_topic_arn
+    events = ["s3:ObjectRemoved:*"]
+    filter_prefix = "original/"
   }
-  lambda_function {
-    lambda_function_arn =data.aws_lambda_function.app_image_resize_lambda.arn
-    events              = ["s3:ObjectCreated:*"]
-    filter_prefix       = "original/"
-    filter_suffix       = ".webp"
-  }
-  depends_on = [aws_s3_bucket.app_image_bucket, data.aws_lambda_function.app_image_resize_lambda]
+
+  # lambda_function {
+  #   id = "on_object_created"
+  #   lambda_function_arn = data.aws_lambda_function.app_on_obeject_created_lambda.arn
+  #   events              = ["s3:ObjectCreated:*"]
+  #   filter_prefix       = "original/"
+  # }
+
+  # lambda_function {
+  #   id = "on_object_deleted"
+  #   lambda_function_arn = data.aws_lambda_function.app_on_object_deleted_lambda.arn
+  #   events              = ["s3:ObjectRemoved:*"]
+  #   filter_prefix       = "original/"
+  # }
+
+# queue {
+#   id = "image_caption_queue"
+#   queue_arn = var.image_caption_queue_arn
+#   events = ["s3:ObjectCreated:*"]
+#   filter_prefix = "original/"
+# }
 
 }
+
 
 ### S3 Bucket for front-end
 resource "aws_s3_bucket" "app_frontend_bucket" {
   bucket = var.app_frontend_bucket_name
 }
 
-# resource "aws_s3_bucket_policy" "app_frontend_bucket_policy" {
-#   bucket = aws_s3_bucket.app_frontend_bucket.id
-#   policy = jsonencode(
-#     {
-
-#       "Version" : "2012-10-17",
-#       "Statement" : [
-#         {
-#           "Effect" : "Allow",
-#           "Principal" : {
-#             "Service" : "cloudfront.amazonaws.com"
-#           },
-#           "Action" : [
-#             "s3:GetObject"
-#           ],
-#           "Resource" : "${aws_s3_bucket.app_frontend_bucket.arn}/*",
-#           "Condition": {
-#                 "StringEquals": {
-#                     "AWS:SourceArn": "${var.app_frontend_cloudfront_arn}"
-#                 }
-#             }
-#         }
-#       ]
-
-#     }
-#   )
-#   depends_on = [aws_s3_bucket.app_frontend_bucket]
-# }
 
 
 resource "aws_s3_bucket_object" "frontend_index_html" {

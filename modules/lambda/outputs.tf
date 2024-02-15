@@ -1,5 +1,11 @@
-output "app_nsfw_detect_lambda_arn" {
+
+output "face_index_lambda_arn" {
   description = "The ARN of the lambda function"
-  value       = aws_lambda_function.app_nsfw_detect_lambda.arn
+  value       = data.aws_lambda_function.app_s3_face_index_lambda.arn
 }
+
+
+
+  
+
 

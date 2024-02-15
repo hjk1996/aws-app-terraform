@@ -11,10 +11,19 @@ variable "app_frontend_bucket_name" {
 }
 
 
-variable "app_nsfw_detect_lambda_arn" {
-  type        = string
-  description = "The ARN of the lambda function"
+variable "image_caption_queue_arn" {
+  type = string
 }
+
+variable "app_on_object_created_topic_arn" {
+  type = string
+  
+}
+
+variable "app_on_object_deleted_topic_arn" {
+  type = string
+}
+
 
 # variable "app_frontend_cloudfront_arn" {
 #   type        = string
