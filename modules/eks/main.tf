@@ -212,6 +212,7 @@ module "face_search_irsa_role" {
   role_policy_arns = {
     RekognitionAccess = "arn:aws:iam::aws:policy/AmazonRekognitionFullAccess",
     S3FullAccess      = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+    SecretManagerFullAccess = "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
   }
 
   oidc_providers = {

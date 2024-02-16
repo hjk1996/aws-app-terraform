@@ -32,7 +32,7 @@ resource "aws_sqs_queue_policy" "image_caption_queue_policy" {
         Resource  = aws_sqs_queue.image_caption_queue.arn
         Condition = {
           ArnEquals = {
-            "aws:SourceArn" : var.app_image_bucket_arn
+            "aws:SourceArn" : var.app_sns_on_object_created_topic_arn
           }
         }
       }

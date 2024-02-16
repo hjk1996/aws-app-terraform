@@ -12,3 +12,12 @@ variable "face_index_lambda_arn" {
 variable "delete_face_index_lambda_arn" {
   type = string
 }
+
+variable "image_resize_lambda_arn" {
+  type = string
+  
+}
+
+variable "image_caption_queue_arn" {
+  type = string
+}

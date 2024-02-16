@@ -6,8 +6,6 @@ provider "aws" {
 }
 
 
-
-
 terraform {
   backend "s3" {
     bucket = "app-tfstate-bucket"
@@ -58,8 +56,10 @@ module "lambda_module" {
   source                          = "./modules/lambda"
   app_image_bucket_arn            = module.s3_module.app_image_bucket_arn
   app_on_object_created_topic_arn = module.sns_module.app_on_object_created_topic_arn
-  delete_face_index_lambda_arn    = module.iam_role_module.delete_face_index_lambda_arn
+  delete_face_index_lambda_iam_role_arn = module.iam_role_module.delete_face_index_lambda_iam_role_arn
+  face_index_lambda_iam_role_arn = module.iam_role_module.face_index_lambda_iam_role_arn
   app_on_object_deleted_topic_arn = module.sns_module.app_on_object_deleted_topic_arn
+  image_resize_lambda_iam_role_arn = module.iam_role_module.image_resize_lambda_iam_role_arn
 }
 
 module "ecr_module" {
@@ -87,6 +87,7 @@ module "sqs_module" {
   face_index_lambda_arn       = module.lambda_module.face_index_lambda_arn
   app_image_bucket_arn        = module.s3_module.app_image_bucket_arn
   image_caption_irsa_role_arn = module.eks_module.image_caption_irsa_role_arn
+  app_sns_on_object_created_topic_arn = module.sns_module.app_on_object_created_topic_arn
 }
 
 module "dynamodb_module" {
@@ -99,4 +100,6 @@ module "sns_module" {
   app_image_bucket_arn  = module.s3_module.app_image_bucket_arn
   face_index_lambda_arn = module.lambda_module.face_index_lambda_arn
   delete_face_index_lambda_arn = module.lambda_module.delete_face_index_lambda_arn
+  image_resize_lambda_arn = module.lambda_module.image_resize_lambda_arn
+  image_caption_queue_arn = module.sqs_module.image_caption_queue_arn
 }

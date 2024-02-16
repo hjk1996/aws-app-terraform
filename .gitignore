@@ -41,3 +41,5 @@ terraform.rc
 
 eks-worker-ssh
 eks-worker-ssh.pub
+
+modules/lambda/zips/*
