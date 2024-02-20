@@ -150,3 +150,9 @@ resource "aws_iam_role_policy_attachment" "image_resize_lambda_role_policy_attac
   role       = aws_iam_role.image_resize_lambda_iam_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
 }
+
+### ############################# ###
+
+
+
+### ############################# ###

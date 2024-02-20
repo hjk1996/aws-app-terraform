@@ -81,6 +81,13 @@ module "eks" {
       version                  = "v1.16.2-eksbuild.1"
       resolve_conflicts        = "OVERWRITE"
       service_account_role_arn = module.vpc_cni_irsa.iam_role_arn
+      configuration_values = jsonencode({
+        env = {
+          # Reference docs https://docs.aws.amazon.com/eks/latest/userguide/cni-increase-ip-addresses.html
+          ENABLE_PREFIX_DELEGATION = "true"
+          WARM_PREFIX_TARGET       = "1"
+        }
+      })
 
     }
   }
@@ -97,7 +104,7 @@ module "eks" {
 
 
   eks_managed_node_group_defaults = {
-    disk_size                  = 100
+    disk_size                  = 150
     instance_types             = var.instance_types
     ami_type                   = "AL2_x86_64"
     iam_role_attach_cni_policy = true
@@ -105,7 +112,7 @@ module "eks" {
       xvda = {
         device_name = "/dev/xvda"
         ebs = {
-          volume_size           = 100
+          volume_size           = 150
           volume_type           = "gp3"
           iops                  = 3000
           throughput            = 150
@@ -118,8 +125,9 @@ module "eks" {
 
   eks_managed_node_groups = {
     eks_worker = {
-      min_size = 1
-      max_size = 3
+      min_size     = 1
+      desired_size = 1
+      max_size     = 4
       labels = {
         role = "general"
       }
@@ -127,7 +135,7 @@ module "eks" {
       subnet_ids     = var.private_subnet_ids
       instance_types = var.instance_types
       capacity_type  = "ON_DEMAND"
-      disk_size      = 100
+      disk_size      = 150
     }
   }
 
@@ -210,8 +218,8 @@ module "face_search_irsa_role" {
   role_name = "${var.eks_cluster_name}-face-search"
 
   role_policy_arns = {
-    RekognitionAccess = "arn:aws:iam::aws:policy/AmazonRekognitionFullAccess",
-    S3FullAccess      = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+    RekognitionAccess       = "arn:aws:iam::aws:policy/AmazonRekognitionFullAccess",
+    S3FullAccess            = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
     SecretManagerFullAccess = "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
   }
 
@@ -234,6 +242,7 @@ module "image_caption_irsa_role" {
   role_policy_arns = {
     SQSFullAccess      = "arn:aws:iam::aws:policy/AmazonSQSFullAccess"
     DynamoDBFullAccess = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+    S3FullAccess       = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
   }
 
   oidc_providers = {

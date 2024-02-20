@@ -1,6 +1,6 @@
 
 
-variable "face_index_lambda_arn" {
+variable "create_table_item_lambda_arn" {
   type = string
 
 }

@@ -1,7 +1,13 @@
-import boto3
+import os
 import json
 import logging
 
+import boto3
+
+
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+)
 # 로거 설정
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -9,7 +15,8 @@ logger.setLevel(logging.INFO)
 rekognition_client = boto3.client("rekognition")
 s3_client = boto3.client("s3")
 dynamodb = boto3.resource("dynamodb")
-table = dynamodb.Table("AppFaceIds")
+dynamodb_table_name = os.environ["DYNAMODB_TABLE_NAME"]
+table = dynamodb.Table(dynamodb_table_name)
 
 def lambda_handler(event, context):
     # SNS 메시지 처리
@@ -21,21 +28,23 @@ def lambda_handler(event, context):
         for s3_record in sns_message['Records']:
             bucket_name = s3_record['s3']['bucket']['name']
             file_name = s3_record['s3']['object']['key']
-
-            # S3 오브젝트 메타데이터에서 user_id 가져오기
-            try:
-                response = s3_client.head_object(Bucket=bucket_name, Key=file_name)
-                user_id = response['Metadata'].get('user_id', '')  # 메타데이터에 user_id가 없을 경우 기본값 ''
-            except Exception as e:
-                logger.error(f"Error getting metadata for object {file_name} in bucket {bucket_name}: {str(e)}")
-                continue  # 메타데이터 조회 실패 시 다음 레코드로 넘어감
-
-            if not user_id:
-                logger.error("No User Id in metadata")
-                continue
-
+            user_id = file_name.split('/')[1]
             base_file_name = file_name.split("/")[-1]
-
+            response = table.put_item(
+                Item={
+                    "file_name": file_name,
+                    "user_id": user_id
+                }
+            )
+            
+            if response["ResponseMetadata"]["HTTPStatusCode"] == 200:
+                logger.info(f"Successfully saved file {file_name} to DynamoDB")
+            else:
+                logger.error(f"Error saving file {file_name} to DynamoDB: {response}")
+                return {"statusCode": 500, "body": json.dumps("Error saving file to DynamoDB.")}
+            
+            
+            
             # 이하 로직은 동일하게 유지
             existing_collections = set(rekognition_client.list_collections()['CollectionIds'])
             if user_id not in existing_collections:
@@ -58,12 +67,10 @@ def lambda_handler(event, context):
             if face_ids:
                 face_ids_str = json.dumps(face_ids)
                 try:
-                    table.put_item(
-                        Item={
-                            'user_id': user_id,
-                            'file_name': file_name,
-                            'face_ids': face_ids_str,
-                        }
+                    table.update_item(
+                        Key={"file_name": file_name, "user_id": user_id},
+                        UpdateExpression="SET face_ids = :val1",
+                        ExpressionAttributeValues={":val1": face_ids_str},
                     )
                     logger.info(f"Successfully saved face IDs to DynamoDB for file {file_name}")
                 except Exception as e:

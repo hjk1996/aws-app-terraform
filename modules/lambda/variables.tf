@@ -23,3 +23,7 @@ variable "face_index_lambda_iam_role_arn" {
 variable "image_resize_lambda_iam_role_arn" {
   type = string
 }
+
+variable "app_image_metadata_table_name" {
+  type = string
+}

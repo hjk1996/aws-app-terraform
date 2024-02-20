@@ -30,6 +30,9 @@ resource "aws_ecr_lifecycle_policy" "app_nsfw_detect_lambda_repo_lifecycle_polic
   policy     = local.ecr_policy
 }
 
+
+#######
+
 resource "aws_ecr_repository" "app_hate_speech_detector_repo" {
   name = "app-hate-speech-detector"
 
@@ -39,3 +42,17 @@ resource "aws_ecr_lifecycle_policy" "app_hate_speech_detector_repo_lifecycle_pol
   repository = aws_ecr_repository.app_hate_speech_detector_repo.name
   policy     = local.ecr_policy
 }
+
+#######
+
+resource "aws_ecr_repository" "app_image_caption_repo" {
+  name = "app-image-caption"
+}
+
+resource "aws_ecr_lifecycle_policy" "app_image_caption_repo_lifecycle_policy" {
+  repository = aws_ecr_repository.app_image_caption_repo.name
+  policy     = local.ecr_policy
+}
+
+
+#######
