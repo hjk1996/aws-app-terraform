@@ -63,6 +63,16 @@ resource "aws_iam_role_policy_attachment" "delete_face_index_lambda_role_policy_
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
 }
 
+resource "aws_iam_role_policy_attachment" "delete_face_index_lambda_role_policy_attachment_5" {
+  role       = aws_iam_role.delete_face_index_iam_role.name
+  policy_arn = "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
+}
+
+
+
+
+
+
 ### ############################# ###
 
 

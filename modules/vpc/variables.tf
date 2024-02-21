@@ -36,3 +36,7 @@ variable "eks_cluster_name" {
   default = "app-eks-cluster"
 }
 
+
+# variable "open_search_vpc_endpoint_id" {
+#   type = string
+# }

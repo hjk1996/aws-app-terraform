@@ -4,15 +4,6 @@
 ##################
 
 
-
-data "archive_file" "delete_table_item" {
-  type        = "zip"
-  source_dir  = "${path.module}/codes/delete_table_item"
-  output_path = "${path.module}/zips/delete_table_item/lambda_function.zip"
-}
-
-
-
 resource "aws_lambda_function" "delete_table_item_lambda" {
   function_name    = "app_delete_table_item"
   handler          = "lambda_function.lambda_handler"
@@ -20,8 +11,13 @@ resource "aws_lambda_function" "delete_table_item_lambda" {
   role             = var.delete_face_index_lambda_iam_role_arn
   filename         = "${path.module}/zips/delete_table_item/lambda_function.zip"
   source_code_hash = filebase64sha256("${path.module}/codes/delete_table_item/lambda_function.py")
+  
+  vpc_config {
+    subnet_ids         = var.app_vpc_public_subnet_ids
+    security_group_ids = [var.delete_table_item_lambda_security_group_id]
+  }
 
-
+  
   environment {
     variables = {
       DYNAMODB_TABLE_NAME = var.app_image_metadata_table_name
@@ -32,9 +28,7 @@ resource "aws_lambda_function" "delete_table_item_lambda" {
     "Terraform" = "true"
   }
 
-  depends_on = [
-    data.archive_file.delete_table_item
-  ]
+
 }
 
 resource "aws_lambda_permission" "app_delete_table_item_allow_sns_invoke" {
@@ -44,6 +38,8 @@ resource "aws_lambda_permission" "app_delete_table_item_allow_sns_invoke" {
   principal     = "sns.amazonaws.com"
   source_arn    = var.app_on_object_deleted_topic_arn
 }
+
+
 
 
 

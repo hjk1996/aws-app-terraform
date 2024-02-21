@@ -24,3 +24,9 @@ output "eks_cluster_endpoint" {
   value       = module.eks_module.eks_cluster_endpoint
 }
 
+# output "open_search_endpoint" {
+#   description = "The endpoint of the OpenSearch cluster"
+#   value       = module.open_search_module.open_search_endpoint
+# }
+
+

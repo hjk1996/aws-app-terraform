@@ -32,7 +32,7 @@ def lambda_handler(event, context):
             base_file_name = file_name.split("/")[-1]
             response = table.put_item(
                 Item={
-                    "file_name": file_name,
+                    "file_name": base_file_name,
                     "user_id": user_id
                 }
             )
@@ -68,7 +68,7 @@ def lambda_handler(event, context):
                 face_ids_str = json.dumps(face_ids)
                 try:
                     table.update_item(
-                        Key={"file_name": file_name, "user_id": user_id},
+                        Key={"file_name": base_file_name, "user_id": user_id},
                         UpdateExpression="SET face_ids = :val1",
                         ExpressionAttributeValues={":val1": face_ids_str},
                     )

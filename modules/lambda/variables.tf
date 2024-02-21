@@ -27,3 +27,23 @@ variable "image_resize_lambda_iam_role_arn" {
 variable "app_image_metadata_table_name" {
   type = string
 }
+
+variable "app_vpc_public_subnet_ids" {
+  type = list(string)
+}
+
+variable "delete_table_item_lambda_security_group_id" {
+  type = string
+
+}
+
+# variable "app_opensearch_index" {
+#   type = string
+  
+# }
+
+
+# variable "app_opensearch_endpoint" {
+#   type = string
+
+# }

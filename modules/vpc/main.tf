@@ -23,6 +23,8 @@ module "app_vpc" {
     "kubernetes.io/role/internal-elb" = "1"
   }
 
+
+
 }
 
 resource "aws_vpc_endpoint" "app-vpc-s3-gateway-endpoint" {
@@ -48,6 +50,37 @@ resource "aws_vpc_endpoint" "app-vpc-s3-gateway-endpoint" {
 
   tags = {
     Name      = "app-vpc-s3-gateway-endpoint"
+    Terraform = "true"
+  }
+}
+
+
+####
+
+
+resource "aws_vpc_endpoint" "app-vpc-dynamodb-endpoint" {
+  vpc_id            = module.app_vpc.vpc_id
+  service_name      = "com.amazonaws.${data.aws_region.current.name}.dynamodb"
+  route_table_ids   = concat(module.app_vpc.public_route_table_ids, module.app_vpc.private_route_table_ids)
+  vpc_endpoint_type = "Gateway"
+
+  policy = <<POLICY
+  {
+    "Version": "2008-10-17",
+    "Statement": [
+      {
+        "Action": "*",
+        "Effect": "Allow",
+        "Resource": "*",
+        "Principal": "*"
+      }
+    ]
+  }
+  POLICY
+
+
+  tags = {
+    Name      = "app-vpc-dynamodb-gateway-endpoint"
     Terraform = "true"
   }
 }

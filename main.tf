@@ -49,18 +49,23 @@ module "vpc_module" {
   vpc_cidr            = "10.0.0.0/16"
   vpc_public_subnets  = ["10.0.1.0/24", "10.0.2.0/24"]
   vpc_private_subnets = ["10.0.101.0/24", "10.0.102.0/24"]
+# open_search_vpc_endpoint_id = module.open_search_module.open_search_vpc_endpoint_id
 }
 
 
 module "lambda_module" {
-  source                                = "./modules/lambda"
-  app_image_bucket_arn                  = module.s3_module.app_image_bucket_arn
-  app_on_object_created_topic_arn       = module.sns_module.app_on_object_created_topic_arn
-  delete_face_index_lambda_iam_role_arn = module.iam_role_module.delete_face_index_lambda_iam_role_arn
-  face_index_lambda_iam_role_arn        = module.iam_role_module.face_index_lambda_iam_role_arn
-  app_on_object_deleted_topic_arn       = module.sns_module.app_on_object_deleted_topic_arn
-  image_resize_lambda_iam_role_arn      = module.iam_role_module.image_resize_lambda_iam_role_arn
-  app_image_metadata_table_name         = module.dynamodb_module.app_image_metadata_table_name
+  source                                     = "./modules/lambda"
+  app_image_bucket_arn                       = module.s3_module.app_image_bucket_arn
+  app_on_object_created_topic_arn            = module.sns_module.app_on_object_created_topic_arn
+  delete_face_index_lambda_iam_role_arn      = module.iam_role_module.delete_face_index_lambda_iam_role_arn
+  face_index_lambda_iam_role_arn             = module.iam_role_module.face_index_lambda_iam_role_arn
+  app_on_object_deleted_topic_arn            = module.sns_module.app_on_object_deleted_topic_arn
+  image_resize_lambda_iam_role_arn           = module.iam_role_module.image_resize_lambda_iam_role_arn
+  app_image_metadata_table_name              = module.dynamodb_module.app_image_metadata_table_name
+  app_vpc_public_subnet_ids                  = module.vpc_module.private_subnet_ids
+  delete_table_item_lambda_security_group_id = module.security_group_module.delete_table_item_lambda_security_group_id
+  # app_opensearch_endpoint = module.open_search_module.open_search_endpoint
+  # app_opensearch_index = "image_caption_vector_index"
 }
 
 module "ecr_module" {
@@ -103,4 +108,31 @@ module "sns_module" {
   delete_table_item_lambda_arn = module.lambda_module.delete_table_item_lambda_arn
   image_resize_lambda_arn      = module.lambda_module.image_resize_lambda_arn
   image_caption_queue_arn      = module.sqs_module.image_caption_queue_arn
+}
+
+# module "open_search_module" {
+#   source = "./modules/open_search"
+#   app_vector_db_security_group_id = module.security_group_module.app_vector_db_security_group_id
+#   collection_name = "app-image-caption-vector"
+#   private_subnet_ids = module.vpc_module.private_subnet_ids
+#   vpc_id = module.vpc_module.app_vpc_id
+#   image_caption_irsa_role_arn = module.eks_module.image_caption_irsa_role_arn
+#   face_search_irsa_role_arn = module.eks_module.face_search_irsa_role_arn
+# }
+
+module "security_manager_module" {
+  source = "./modules/security_manager"
+  
+}
+
+# module "rds_module" {
+#   source = "./modules/rds"
+#   app_private_subnet_ids = module.vpc_module.private_subnet_ids
+#   app_vector_db_security_group_id = module.security_group_module.app_vector_db_security_group_id
+# }
+
+module "documentdb_module" {
+  source = "./modules/documentdb"
+  app_private_subnet_ids = module.vpc_module.private_subnet_ids
+  app_vector_db_security_group_id = module.security_group_module.app_vector_db_security_group_id
 }

@@ -110,26 +110,6 @@ resource "aws_s3_bucket_notification" "app_s3_notification" {
     filter_prefix = "original/"
   }
 
-  # lambda_function {
-  #   id = "on_object_created"
-  #   lambda_function_arn = data.aws_lambda_function.app_on_obeject_created_lambda.arn
-  #   events              = ["s3:ObjectCreated:*"]
-  #   filter_prefix       = "original/"
-  # }
-
-  # lambda_function {
-  #   id = "on_object_deleted"
-  #   lambda_function_arn = data.aws_lambda_function.app_on_object_deleted_lambda.arn
-  #   events              = ["s3:ObjectRemoved:*"]
-  #   filter_prefix       = "original/"
-  # }
-
-  # queue {
-  #   id = "image_caption_queue"
-  #   queue_arn = var.image_caption_queue_arn
-  #   events = ["s3:ObjectCreated:*"]
-  #   filter_prefix = "original/"
-  # }
 
 }
 
@@ -148,4 +128,11 @@ resource "aws_s3_bucket_object" "frontend_index_html" {
   etag         = filemd5("./index.html")
   content_type = "text/html"
   depends_on   = [aws_s3_bucket.app_frontend_bucket]
+}
+
+
+####
+
+resource "aws_s3_bucket" "app_lambda_code_bucket" {
+  bucket = "app-lambda-code-bucket"
 }

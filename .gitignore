@@ -43,3 +43,5 @@ eks-worker-ssh
 eks-worker-ssh.pub
 
 modules/lambda/zips/*
+
+modules/**/venv

@@ -243,6 +243,8 @@ module "image_caption_irsa_role" {
     SQSFullAccess      = "arn:aws:iam::aws:policy/AmazonSQSFullAccess"
     DynamoDBFullAccess = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
     S3FullAccess       = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+    SecretManagerFullAccess = "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
+
   }
 
   oidc_providers = {
