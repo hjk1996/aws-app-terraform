@@ -81,9 +81,6 @@ resource "aws_s3_bucket_cors_configuration" "example" {
 
 }
 
-data "aws_lambda_function" "app_image_resize_lambda" {
-  function_name = "app-image-resize"
-}
 
 data "aws_lambda_function" "app_on_obeject_created_lambda" {
   function_name = "app_on_object_created"

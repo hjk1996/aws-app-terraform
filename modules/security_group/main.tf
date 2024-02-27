@@ -54,7 +54,7 @@ resource "aws_security_group" "app_vector_db_security_group" {
     from_port   = 27017
     to_port     = 27018
     protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"] 
+    cidr_blocks = ["10.0.0.0/16"]
   }
 
   # 아웃바운드 규칙 예시: 모든 아웃바운드 트래픽 허용

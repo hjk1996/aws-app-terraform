@@ -16,9 +16,9 @@ resource "aws_opensearchserverless_security_policy" "encryption_policy" {
 }
 
 resource "aws_opensearchserverless_collection" "app_image_caption_vector_collection" {
-  name = var.collection_name
+  name        = var.collection_name
   description = "Collection for storing image caption vectors"
-  type = "VECTORSEARCH"
+  type        = "VECTORSEARCH"
 
   depends_on = [aws_opensearchserverless_security_policy.encryption_policy]
 

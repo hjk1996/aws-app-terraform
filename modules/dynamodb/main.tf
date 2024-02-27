@@ -7,6 +7,7 @@ resource "aws_dynamodb_table" "app_image_metadata_table" {
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "file_name"
   range_key    = "user_id"
+
   attribute {
     name = "user_id"
     type = "S"

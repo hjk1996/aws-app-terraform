@@ -1,5 +1,5 @@
 output "open_search_vpc_endpoint_id" {
-  value = aws_opensearchserverless_vpc_endpoint.vpc_endpoint.id  
+  value = aws_opensearchserverless_vpc_endpoint.vpc_endpoint.id
 }
 
 output "open_search_endpoint" {

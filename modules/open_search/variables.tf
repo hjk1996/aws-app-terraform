@@ -6,7 +6,7 @@ variable "collection_name" {
 
 variable "vpc_id" {
   type = string
-  
+
 }
 
 variable "private_subnet_ids" {
@@ -17,7 +17,7 @@ variable "private_subnet_ids" {
 
 
 variable "app_vector_db_security_group_id" {
-    type = string
+  type = string
 }
 
 variable "face_search_irsa_role_arn" {

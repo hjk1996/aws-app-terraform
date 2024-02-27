@@ -37,9 +37,35 @@ variable "delete_table_item_lambda_security_group_id" {
 
 }
 
+
+variable "app_image_bucket_name" {
+  type = string
+
+}
+
+
+variable "image_resize_queue_arn" {
+  type = string
+
+}
+
+variable "image_metadata_queue_arn" {
+  type = string
+}
+
+variable "image_delete_cleanup_lambda_iam_role_arn" {
+  type = string
+
+}
+
+variable "delete_cleanup_queue_arn" {
+  type = string
+
+}
+
 # variable "app_opensearch_index" {
 #   type = string
-  
+
 # }
 
 

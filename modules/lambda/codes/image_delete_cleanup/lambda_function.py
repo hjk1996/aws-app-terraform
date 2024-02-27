@@ -27,6 +27,7 @@ def get_secret():
     return json.loads(secret)
 
 
+
 def download_pem_file() -> bool:
     # URL에서 파일을 가져옵니다.
     response = requests.get(
@@ -35,7 +36,7 @@ def download_pem_file() -> bool:
     # HTTP 요청이 성공했는지 확인합니다 (상태 코드 200).
     if response.status_code == 200:
         # 파일을 쓰기 모드로 열고 내용을 기록합니다.
-        with open("global-bundle.pem", "wb") as file:
+        with open("/tmp/global-bundle.pem", "wb") as file:
             file.write(response.content)
         return True
     else:
@@ -50,27 +51,22 @@ dynamodb = boto3.resource("dynamodb")
 dynamodb_table_name = os.environ["DYNAMODB_TABLE_NAME"]
 table = dynamodb.Table(dynamodb_table_name)
 rekognition = boto3.client("rekognition")
-secret = get_secret()
-mongo_client = MongoClient(
-    host=secret["host"],
-    port=27017,
-    username=secret["username"],
-)
 
-secret = get_secret()
-logging.info("Getting DocumentDB secret")
+logger.info("Getting DocumentDB secret")
 
 download_success = download_pem_file()
 if not download_success:
-    logging.error("Failed to download global-bundle.pem file.")
+    logger.error("Failed to download global-bundle.pem file.")
     exit(1)
 else:
-    logging.info("Downloaded global-bundle.pem file.")
+    logger.info("Downloaded global-bundle.pem file.")
 
-
+secret = get_secret()
+logging.info("Successfully retrieved DocumentDB secret")
 mongo_client = MongoClient(
-    f"mongodb://{secret['username']}:{secret['password']}@{secret['host']}:{secret['port']}/?tls=true&tlsCAFile=global-bundle.pem&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false"
+    f"mongodb://{secret['username']}:{secret['password']}@{secret['host']}:{secret['port']}/?tls=true&tlsCAFile=/tmp/global-bundle.pem&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false"
 )
+logger.info("Connected to DocumentDB")
 db = mongo_client["image_metadata"]
 collection = db["caption_vector"]
 
@@ -94,9 +90,11 @@ def lambda_handler(event, context):
     # SNS 메시지에서 S3 오브젝트 정보 추출
     for record in event["Records"]:
         # SNS 메시지 본문 파싱
-        message = json.loads(record["Sns"]["Message"])
+        body = json.loads(record["body"])
+        # SNS 메시지 형식의 실제 메시지 파싱
+        sns_message = json.loads(body["Message"])
         # S3 오브젝트 정보 추출
-        for s3_record in message["Records"]:
+        for s3_record in sns_message["Records"]:
             file_name = s3_record["s3"]["object"]["key"]
             base_file_name = file_name.split("/")[-1]
             user_id = file_name.split("/")[1]
@@ -116,19 +114,20 @@ def lambda_handler(event, context):
                 if item["Item"].get("face_ids") is not None:
                     face_ids = json.loads(item["Item"]["face_ids"])
                     delete_face_response = delete_face_ids(face_ids, user_id)
+                    logger.info(
+                        f"Deleted face IDs {face_ids} from Rekognition: {delete_face_response}"
+                    )
 
                 delete_response = table.delete_item(
                     Key={"file_name": base_file_name, "user_id": user_id}
                 )
-
                 logger.info(
                     f"Deleted {file_name} record from DynamoDB: {delete_response}"
                 )
-                
-                collection.delete_one({"file_name": base_file_name})
-                
-                logger.info(f"Deleted {file_name} record from DocumentDB")
-                
+                delete_response = collection.delete_one({"file_name": base_file_name})
+                logger.info(
+                    f"Deleted {file_name} record from DocumentDB: {delete_response}"
+                )
 
             except Exception as e:
                 logger.error(f"Error processing {file_name}: {str(e)}")
