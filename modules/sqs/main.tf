@@ -151,14 +151,14 @@ resource "aws_sqs_queue_policy" "delete_cleanup_queue_policy" {
           "sqs:DeleteMessage",
           "sqs:GetQueueAttributes"
         ]
-        Resource = aws_sqs_queue.image_metadata_queue.arn
+        Resource = aws_sqs_queue.delete_cleanup_queue.arn
       },
 
       {
         Effect    = "Allow"
         Principal = "*"
         Action    = "sqs:SendMessage"
-        Resource  = aws_sqs_queue.image_metadata_queue.arn
+        Resource  = aws_sqs_queue.delete_cleanup_queue.arn
         Condition = {
           ArnEquals = {
             "aws:SourceArn" : var.app_sns_on_object_deleted_topic_arn
