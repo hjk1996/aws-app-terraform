@@ -11,7 +11,7 @@ resource "aws_lambda_function" "image_delete_cleanup_lambda" {
   role             = var.image_delete_cleanup_lambda_iam_role_arn
   filename         = "${path.module}/zips/image_delete_cleanup/lambda_function.zip"
   source_code_hash = filebase64sha256("${path.module}/codes/image_delete_cleanup/lambda_function.py")
-
+  timeout = 60
   vpc_config {
     subnet_ids         = var.app_vpc_public_subnet_ids
     security_group_ids = [var.delete_table_item_lambda_security_group_id]
@@ -61,6 +61,7 @@ resource "aws_lambda_function" "face_index_lambda" {
   runtime          = "python3.12"
   role             = var.face_index_lambda_iam_role_arn
   filename         = "${path.module}/zips/face_index/lambda_function.zip"
+  timeout = 60
 
   environment {
     variables = {
@@ -103,6 +104,8 @@ resource "aws_lambda_function" "image_resize_lambda" {
   runtime       = "python3.12"
   s3_bucket     = "app-lambda-code-bucket"
   s3_key        = "app_image_resize/lambda_function.zip"
+  timeout = 600
+  memory_size = 1024
   role          = var.image_resize_lambda_iam_role_arn
   tags = {
     "Terraform" = "true"
